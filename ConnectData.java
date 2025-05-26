@@ -1,5 +1,11 @@
 import javax.swing.table.DefaultTableModel;
 import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class ConnectData {
     private Connection con;
@@ -88,24 +94,6 @@ public class ConnectData {
         }
     }
 
-    public boolean themNhanVien(String ten, String ngaysinh, String chucvu, String sdt) {
-        String sql = "INSERT INTO Nhanvien(hoten, ngaysinh, chucvu, sdt) VALUES (?, ?, ?, ?)";
-        if (kiemTraSDT("Nhanvien", sdt)) {
-            System.out.println("Đã tồn tại");
-            return false;
-        }
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, ten);
-            ps.setString(2, ngaysinh);
-            ps.setString(3, chucvu);
-            ps.setString(4, sdt);
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
     public boolean themPhanCong(int maNV, int maBN, String ngay, String ghichu) {
         String sql = "INSERT INTO Phancong(id_benhnhan, id_nhanvien, ngayphancong, ghichu) VALUES (?, ?, ?, ?)";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -116,32 +104,6 @@ public class ConnectData {
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean themHoaDon(int maBN, String dichvu, int songay, double dongia, String ngaylap) {
-        String sql = "INSERT INTO Hoadon(id_benhnhan, dichvu, songay, dongia, ngaylap) VALUES (?, ?, ?, ?, ?)";
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, maBN);
-            ps.setString(2, dichvu);
-            ps.setInt(3, songay);
-            ps.setDouble(4, dongia);
-            ps.setString(5, ngaylap);
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean XoaBenhNhan(int id) {
-        String sql = "DELETE FROM Benhnhan WHERE id_benhnhan = ?";
-        try (PreparedStatement pstmt = con.prepareStatement(sql)) {
-            pstmt.setInt(1, id);
-            return pstmt.executeUpdate() > 0;
-        } catch (SQLException ex) {
-            ex.printStackTrace();
             return false;
         }
     }
@@ -164,6 +126,17 @@ public class ConnectData {
             return stmt.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean XoaBenhNhan(int id) {
+        String sql = "DELETE FROM Benhnhan WHERE id_benhnhan = ?";
+        try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
             return false;
         }
     }
@@ -196,21 +169,302 @@ public class ConnectData {
             e.printStackTrace();
         }
     }
+//  Bệnh án
+    public DefaultTableModel getBenhAnModel() {
+        // Tiêu đề cột phải khớp với JTable của bạn
+        String[] columns = {
+                "Mã bệnh án", "Mã cư dân", "Họ tên", "Phụ trách", "Ngày khám",
+                "Tổng quan", "Chẩn đoán", "Đơn thuốc", "Ghi chú"
+        };
+        DefaultTableModel model = new DefaultTableModel(columns, 0);
 
-    public boolean themBenhAn(int maBN, String ngaykham, String chandoan, String donthuoc, String ghichu) {
-        String sql = "INSERT INTO Benhan(id_benhnhan, ngaykham, chandoan, donthuoc, ghichu) VALUES (?, ?, ?, ?, ?)";
+        String sql = "SELECT id_benhan, id_benhnhan, ten_benhnhan, phutrach, ngaykham, tinhtrangchung, chandoan, donthuoc, ghichu FROM Benhan";
+        try (PreparedStatement pstmt = con.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                Object[] row = new Object[] {
+                        rs.getInt("id_benhan"),
+                        rs.getInt("id_benhnhan"),
+                        rs.getString("ten_benhnhan"),
+                        rs.getString("phutrach"),
+                        rs.getString("ngaykham"),
+                        rs.getString("chandoan"),
+                        rs.getString("donthuoc"),
+                        rs.getString("ghichu"),
+                        rs.getString("tinhtrangchung")
+                };
+                model.addRow(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return model;
+    }
+
+    public boolean themBenhAn(int maBA, int maBN, String tenBN, String phutrach, String ngaykham, String chandoan, String donthuoc, String ghichu, String ttc) {
+        String sql = "INSERT INTO Benhan(id_benhnhan, ten_benhnhan, phutrach, ngaykham, tinhtrangchung, chandoan, donthuoc, ghichu) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, maBN);
-            ps.setString(2, ngaykham);
-            ps.setString(3, chandoan);
-            ps.setString(4, donthuoc);
-            ps.setString(5, ghichu);
+            ps.setString(2, tenBN);
+            ps.setString(3, phutrach);
+            ps.setString(4, ngaykham);
+            ps.setString(5, ttc);
+            ps.setString(6, chandoan);
+            ps.setString(7, donthuoc);
+            ps.setString(8, ghichu);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
     }
+
+    public boolean suaBenhAn(int maBA, int maBN, String tenBN, String phutrach, String ngaykham, String chandoan, String donthuoc, String ghichu, String ttc) {
+        String sql = "UPDATE Benhan SET id_benhnhan=?, ten_benhnhan=?, phutrach=?, ngaykham=?, tinhtrangchung=?, chandoan=?, " +
+                "donthuoc=?, ghichu=? WHERE id_benhan=?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, maBN);
+            ps.setString(2, tenBN);
+            ps.setString(3, phutrach);
+            ps.setString(4, ngaykham);
+            ps.setString(5, ttc);
+            ps.setString(6, chandoan);
+            ps.setString(7, donthuoc);
+            ps.setString(8, ghichu);
+            ps.setInt(9, maBA);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean XoaBenhAn(int idBA) {
+        String sql = "DELETE FROM Benhan WHERE id_benhan = ?";
+        try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+            pstmt.setInt(1, idBA);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            return false;
+        }
+    }
+
+    public void timKiemBenhAn(DefaultTableModel model, String keyword) {
+        String sql = "SELECT * FROM Benhan WHERE ten_benhnhan LIKE ?";
+        try (PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setString(1, "%" + keyword + "%");
+
+            ResultSet rs = stmt.executeQuery();
+
+            model.setRowCount(0); // Xóa dữ liệu cũ
+
+            while (rs.next()) {
+                model.addRow(new Object[]{
+                        rs.getInt("id_benhan"),
+                        rs.getInt("id_benhnhan"),
+                        rs.getString("ten_benhnhan"),
+                        rs.getString("phutrach"),
+                        rs.getString("ngaykham"),
+                        rs.getString("tinhtrangchung"),
+                        rs.getString("chandoan"),
+                        rs.getString("donthuoc"),
+                        rs.getString("ghichu")
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public ArrayList<String> getDanhSachNhanVien() {
+        ArrayList<String> danhSach = new ArrayList<>();
+        String sql = "SELECT hoten FROM Nhanvien";
+        try {Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                danhSach.add(rs.getString("hoten"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return danhSach;
+    }
+
+    //    Hóa đơn
+//    Hiển thị lên bảng
+    public DefaultTableModel getHoaDonModel() {
+        String[] columns = {
+                "Mã hóa đơn", "Mã bệnh nhân", "Họ tên", "Từ ngày", "Đến ngày", "Ngày lập", "Dịch vụ", "Số ngày", "Đơn giá", "Thành tiền", "Trạng thái"
+        };
+        DefaultTableModel model = new DefaultTableModel(columns, 0);
+
+        String sql = "SELECT id_hoadon, id_benhnhan, hoten, tungay, denngay, dichvu, dongia, tongtien, ngaylap, trangthai FROM Hoadon";
+        try (PreparedStatement pstmt = con.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                Date tungay = rs.getDate("tungay");
+                Date denngay = rs.getDate("denngay");
+                long diff = Math.abs(denngay.getTime() - tungay.getTime());
+                int songay = (int) TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
+
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+
+                Object[] row = new Object[] {
+                        rs.getInt("id_hoadon"),
+                        rs.getInt("id_benhnhan"),
+                        rs.getString("hoten"),
+                        sdf.format(tungay),
+                        sdf.format(denngay),
+                        rs.getString("ngaylap"),
+                        rs.getString("dichvu"),
+                        songay,
+                        rs.getDouble("dongia"),
+                        rs.getDouble("tongtien"),
+                        rs.getString("trangthai")
+                };
+                model.addRow(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return model;
+    }
+
+    public boolean themHoaDon(String maHoaDon, Date tuNgay, Date denNgay, String maBenhNhan,
+                              String hoTen, String dichVu, double thanhTien, String ngayLap, String trangThai,
+                              int soNgay, double donGia) {
+        String sqlInvoices = "INSERT INTO Hoadon (id_benhnhan, hoten, tungay, denngay, dichvu, dongia, tongtien, ngaylap, trangthai) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (PreparedStatement psHD = con.prepareStatement(sqlInvoices)) {
+
+            java.sql.Date sqlTuNgay = new java.sql.Date(tuNgay.getTime());
+            java.sql.Date sqlDenNgay = new java.sql.Date(denNgay.getTime());
+            java.sql.Date sqlNgayLap = new java.sql.Date(new SimpleDateFormat("dd/MM/yyyy").parse(ngayLap).getTime());
+
+            // Thêm vào bảng Hóa đơn
+            psHD.setInt(1, Integer.parseInt(maBenhNhan)); // id_benhnhan
+            psHD.setString(2, hoTen); // hoten
+            psHD.setDate(3, sqlTuNgay); // tungay
+            psHD.setDate(4, sqlDenNgay);
+            psHD.setString(5, dichVu); // dichvu
+            psHD.setDouble(6, donGia); // dongia
+            psHD.setDouble(7, thanhTien); // tongtien
+            psHD.setDate(8, sqlNgayLap);
+            psHD.setString(9, trangThai); // trangthai
+            int rowHD = psHD.executeUpdate();
+
+            return rowHD > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean suaHoaDon(String maHoaDon, Date tuNgay, Date denNgay, String maBenhNhan,
+                             String hoTen, String dichVu, double thanhTien, String ngayLap, String trangThai,
+                             int soNgay, double donGia) {
+        String sql = "UPDATE Hoadon SET MaBenhNhan = ?, HoTen = ?, TuNgay = ?, DenNgay = ?, NgayLap = ?, " +
+                "DichVu = ?, SoNgay = ?, DonGia = ?, ThanhTien = ?, TrangThai = ? WHERE MaHoaDon = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+
+            java.sql.Date sqlTuNgay = new java.sql.Date(tuNgay.getTime());
+            java.sql.Date sqlDenNgay = new java.sql.Date(denNgay.getTime());
+            java.sql.Date sqlNgayLap = new java.sql.Date(new SimpleDateFormat("dd/MM/yyyy").parse(ngayLap).getTime());
+
+            ps.setInt(1, Integer.parseInt(maBenhNhan)); // id_benhnhan
+            ps.setString(2, hoTen); // hoten
+            ps.setDate(3, sqlTuNgay); // tungay
+            ps.setDate(4, sqlDenNgay);
+            ps.setString(5, dichVu); // dichvu
+            ps.setDouble(6, donGia); // dongia
+            ps.setDouble(7, thanhTien); // tongtien
+            ps.setDate(8, sqlNgayLap);
+            ps.setString(9, trangThai);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+//  Nhân sự
+    public DefaultTableModel getNhanvienModel() {
+        String[] columns = {
+                "Mã nhân viên", "Họ tên", "Giới tính", "Ngày sinh", "Điện thoại", "Địa chỉ", "Phòng ban", "Chức vụ", "Mức lương"
+        };
+        DefaultTableModel model = new DefaultTableModel(columns, 0);
+
+        String sql = "SELECT id_nhanvien, hoten, gioitinh, ngaysinh, dienthoai, diachi, phongban, chucvu, mucluong FROM Nhanvien";
+
+        try (PreparedStatement pstmt = con.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                Object[] row = new Object[] {
+                        rs.getInt("id_nhanvien"),
+                        rs.getString("hoten"),
+                        rs.getString("gioitinh"),
+                        rs.getDate("ngaysinh"),
+                        rs.getString("dienthoai"),
+                        rs.getString("diachi"),
+                        rs.getString("phongban"),
+                        rs.getString("chucvu"),
+                        rs.getString("mucluong")
+                };
+                model.addRow(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return model;
+    }
+
+    public boolean themNhansu(String manv, String hoten, String gioitinh, Date ngsinh, String dienthoai,
+                              String diachi, String phongban, String chucvu, String mucluong) {
+        String sql = "INSERT INTO Nhanvien (hoten, gioitinh, ngaysinh, dienthoai, diachi, phongban, chucvu, mucluong) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+
+            java.sql.Date sqlngSinh = new java.sql.Date(ngsinh.getTime());
+
+            ps.setString(1, hoten);
+            ps.setString(2, gioitinh);
+            ps.setDate(3, sqlngSinh);
+            ps.setString(4, dienthoai);
+            ps.setString(5, diachi);
+            ps.setString(6, phongban);
+            ps.setString(7, chucvu);
+            ps.setString(8, mucluong);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean suaNhansu(String manv, String hoten, String gioitinh, Date ngsinh, String dienthoai,
+                             String diachi, String phongban, String chucvu, String mucluong) {
+        String sql = "UPDATE Nhanvien SET hoten=?, gioitinh=?, ngaysinh=?, dienthoai=?, diachi=?, phongban=?, chucvu=?, mucluong=? WHERE id_nhanvien=?";
+        try (PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setString(1, hoten);
+            stmt.setString(2, gioitinh);
+            stmt.setDate(3, new java.sql.Date(ngsinh.getTime()));
+            stmt.setString(4, dienthoai);
+            stmt.setString(5, diachi);
+            stmt.setString(6, phongban);
+            stmt.setString(7, chucvu);
+            stmt.setString(8, mucluong);
+            stmt.setString(9, manv);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 
     public static void main(String[] args) {
         ConnectData cd = new ConnectData();

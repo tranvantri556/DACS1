@@ -9,6 +9,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class BenhNhanPanel extends JPanel {
     public JTextField IDField, hotenField, sodienthoaiField, lienlacField, timkiemBenhNhanField, tennguoithanField;
+    public JTextArea diachiField;
     public JRadioButton namRadioButton, nuRadioButton;
     public JTable benhnhanTable;
     public DefaultTableModel benhnhanModel;
@@ -68,7 +69,7 @@ public class BenhNhanPanel extends JPanel {
         sodienthoaiField.setBounds(432, 69, 123, 20);
         add(sodienthoaiField);
 
-        JTextArea diachiField = new JTextArea();
+        diachiField = new JTextArea();
         diachiField.setFont(new Font("Monospaced", Font.PLAIN, 15));
         diachiField.setBounds(432, 11, 123, 33);
         add(diachiField);
@@ -127,7 +128,7 @@ public class BenhNhanPanel extends JPanel {
 
         chonanhButton = new JButton("Chọn ảnh đại diện");
         chonanhButton.setFont(new Font("Constantia", Font.PLAIN, 12));
-//        chonanhButton.setIcon(new ImageIcon(View.class.getResource("/images/chonanh.png")));
+        chonanhButton.setIcon(new ImageIcon(View.class.getResource("/images/chonanh.png")));
         chonanhButton.setBounds(868, 210, 163, 33);
         add(chonanhButton);
 
@@ -200,75 +201,6 @@ public class BenhNhanPanel extends JPanel {
         timkiemButton.setBounds(129, 59, 24, 33);
         timkiemPanel.add(timkiemButton);
 
-        // Sau khi khởi tạo benhnhanTable và benhnhanModel
-        benhnhanTable.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                int row = benhnhanTable.getSelectedRow();
-                if (row < 0) return;
-
-                IDField.setText(     benhnhanModel.getValueAt(row, 0).toString());
-                hotenField.setText(  benhnhanModel.getValueAt(row, 1).toString());
-
-                // Ngày sinh:
-                Object objNs = benhnhanModel.getValueAt(row, 2);
-                if (objNs instanceof java.sql.Date) {
-                    ngaysinh.setDate(new java.util.Date(((java.sql.Date)objNs).getTime()));
-                }
-
-                // Giới tính
-                String gt = benhnhanModel.getValueAt(row, 3).toString();
-                namRadioButton.setSelected(gt.equals("Nam"));
-                nuRadioButton.setSelected(gt.equals("Nữ"));
-
-                // Địa chỉ
-                diachiField.setText( benhnhanModel.getValueAt(row, 4).toString());
-
-                // SĐT
-                sodienthoaiField.setText(benhnhanModel.getValueAt(row, 5).toString());
-
-                // Người thân: tách tên – quan hệ nếu cần
-                String fullThan = benhnhanModel.getValueAt(row, 6).toString();
-
-                if (fullThan.contains(" (") && fullThan.endsWith(")")) {
-                    // Tách name và rel
-                    String name = fullThan.substring(0, fullThan.indexOf(" (")).trim();
-                    String rel = fullThan.substring(fullThan.indexOf(" (") + 2, fullThan.length() - 1).trim(); // Bỏ dấu "(" và ")"
-
-                    // Cập nhật JTextField với name
-                    tennguoithanField.setText(name);
-
-                    // Tìm item phù hợp trong ComboBox
-                    boolean found = false;
-                    for (int i = 0; i < nguoithanButton.getItemCount(); i++) {
-                        String item = nguoithanButton.getItemAt(i).toString().trim();
-                        if (item.equalsIgnoreCase(rel)) {
-                            nguoithanButton.setSelectedIndex(i); // Chọn item phù hợp
-                            found = true;
-                            break;
-                        }
-                    }
-
-                    if (!found) {
-                        nguoithanButton.setSelectedIndex(0); // Chọn mặc định nếu không khớp
-                    }
-                } else {
-                    // Nếu không có dấu "(" và ")"
-                    tennguoithanField.setText(fullThan.trim());
-                    nguoithanButton.setSelectedIndex(0); // Không có thông tin người thân
-                }
-
-
-                // Liên lạc
-                lienlacField.setText(benhnhanModel.getValueAt(row, 7).toString());
-
-                // Ngày vào viện
-                Object objNv = benhnhanModel.getValueAt(row, 8);
-                if (objNv instanceof java.sql.Date) {
-                    ngayvaovien.setDate(new java.util.Date(((java.sql.Date)objNv).getTime()));
-                }
-            }
-        });
-
         themBenhNhan.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -322,18 +254,7 @@ public class BenhNhanPanel extends JPanel {
                                 id, hoten, sqlNs, gioiTinh, diachi,
                                 sodienthoai, nguoithan + " (" + quanHe + ")", lienlac, sqlNv
                         });
-                        // reset form
-                        IDField.setText("");
-                        hotenField.setText("");
-                        diachiField.setText("");
-                        sodienthoaiField.setText("");
-                        ngaysinh.setDate(null);
-                        ngayvaovien.setDate(null);
-                        tennguoithanField.setText("");
-                        lienlacField.setText("");
-                        namRadioButton.setSelected(false);
-                        nuRadioButton.setSelected(false);
-                        nguoithanButton.setSelectedIndex(0);
+                        clearForm();
                     } else {
                         JOptionPane.showMessageDialog(null, "Thêm thất bại (có thể SĐT đã tồn tại)");
                     }
@@ -400,18 +321,7 @@ public class BenhNhanPanel extends JPanel {
                         benhnhanModel.setValueAt(sqlNv, selectedRow, 8);
 
                         JOptionPane.showMessageDialog(null, "Cập nhật thành công!");
-
-                        IDField.setText("");
-                        hotenField.setText("");
-                        diachiField.setText("");
-                        sodienthoaiField.setText("");
-                        ngaysinh.setDate(null);
-                        ngayvaovien.setDate(null);
-                        tennguoithanField.setText("");
-                        lienlacField.setText("");
-                        namRadioButton.setSelected(false);
-                        nuRadioButton.setSelected(false);
-                        nguoithanButton.setSelectedIndex(0);
+                        clearForm();
                     } else {
                         JOptionPane.showMessageDialog(null, "Cập nhật thất bại!");
                     }
@@ -451,18 +361,7 @@ public class BenhNhanPanel extends JPanel {
                     // Xóa khỏi UI
                     benhnhanModel.removeRow(row);
                     JOptionPane.showMessageDialog(null, "Xóa thành công!");
-
-                    IDField.setText("");
-                    hotenField.setText("");
-                    diachiField.setText("");
-                    sodienthoaiField.setText("");
-                    ngaysinh.setDate(null);
-                    ngayvaovien.setDate(null);
-                    tennguoithanField.setText("");
-                    lienlacField.setText("");
-                    namRadioButton.setSelected(false);
-                    nuRadioButton.setSelected(false);
-                    nguoithanButton.setSelectedIndex(0);
+                    clearForm();
                 } else {
                     JOptionPane.showMessageDialog(null, "Xóa thất bại. Vui lòng thử lại.");
                 }
@@ -486,13 +385,94 @@ public class BenhNhanPanel extends JPanel {
                 }
             }
         });
+
+        // Sau khi khởi tạo benhnhanTable và benhnhanModel
+        benhnhanTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int row = benhnhanTable.getSelectedRow();
+                if (row < 0) return;
+
+                IDField.setText(benhnhanModel.getValueAt(row, 0).toString());
+                hotenField.setText(benhnhanModel.getValueAt(row, 1).toString());
+
+                // Ngày sinh:
+                Object objNs = benhnhanModel.getValueAt(row, 2);
+                if (objNs instanceof java.sql.Date) {
+                    ngaysinh.setDate(new java.util.Date(((java.sql.Date)objNs).getTime()));
+                }
+
+                // Giới tính
+                String gt = benhnhanModel.getValueAt(row, 3).toString();
+                namRadioButton.setSelected(gt.equals("Nam"));
+                nuRadioButton.setSelected(gt.equals("Nữ"));
+
+                // Địa chỉ
+                diachiField.setText( benhnhanModel.getValueAt(row, 4).toString());
+
+                // SĐT
+                sodienthoaiField.setText(benhnhanModel.getValueAt(row, 5).toString());
+
+                // Người thân: tách tên – quan hệ nếu cần
+                String fullThan = benhnhanModel.getValueAt(row, 6).toString();
+
+                if (fullThan.contains(" (") && fullThan.endsWith(")")) {
+                    // Tách name và rel
+                    String name = fullThan.substring(0, fullThan.indexOf(" (")).trim();
+                    String rel = fullThan.substring(fullThan.indexOf(" (") + 2, fullThan.length() - 1).trim(); // Bỏ dấu "(" và ")"
+
+                    // Cập nhật JTextField với name
+                    tennguoithanField.setText(name);
+
+                    // Tìm item phù hợp trong ComboBox
+                    boolean found = false;
+                    for (int i = 0; i < nguoithanButton.getItemCount(); i++) {
+                        String item = nguoithanButton.getItemAt(i).toString().trim();
+                        if (item.equalsIgnoreCase(rel)) {
+                            nguoithanButton.setSelectedIndex(i); // Chọn item phù hợp
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found) {
+                        nguoithanButton.setSelectedIndex(0); // Chọn mặc định nếu không khớp
+                    }
+                } else {
+                    // Nếu không có dấu "(" và ")"
+                    tennguoithanField.setText(fullThan.trim());
+                    nguoithanButton.setSelectedIndex(0); // Không có thông tin người thân
+                }
+
+
+                // Liên lạc
+                lienlacField.setText(benhnhanModel.getValueAt(row, 7).toString());
+
+                // Ngày vào viện
+                Object objNv = benhnhanModel.getValueAt(row, 8);
+                if (objNv instanceof java.sql.Date) {
+                    ngayvaovien.setDate(new java.util.Date(((java.sql.Date)objNv).getTime()));
+                }
+            }
+        });
     }
 
     public DefaultTableModel getBenhNhanModel() {
         return benhnhanModel;
     }
 
-
+    public void clearForm (){
+        IDField.setText("");
+        hotenField.setText("");
+        diachiField.setText("");
+        sodienthoaiField.setText("");
+        ngaysinh.setDate(null);
+        ngayvaovien.setDate(null);
+        tennguoithanField.setText("");
+        lienlacField.setText("");
+        namRadioButton.setSelected(false);
+        nuRadioButton.setSelected(false);
+        nguoithanButton.setSelectedIndex(0);
+    }
 
     public JTable getBenhNhanTable() {
         return benhnhanTable;

@@ -1,23 +1,9 @@
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
+import java.awt.*;
+import javax.swing.*;
+import javax.swing.border.*;
+import javax.swing.event.*;
+import java.awt.event.*;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.AncestorEvent;
-import javax.swing.event.AncestorListener;
-import javax.swing.JLabel;
-import javax.swing.ImageIcon;
-import java.awt.CardLayout;
-import java.awt.Font;
-import java.awt.Color;
-import javax.swing.SwingConstants;
-import javax.swing.JTextField;
-import javax.swing.DropMode;
-import javax.swing.JPasswordField;
-import javax.swing.JCheckBox;
-import javax.swing.JButton;
-import java.awt.Component;
 
 public class LognIn extends JFrame {
 
@@ -50,32 +36,29 @@ public class LognIn extends JFrame {
      */
     public LognIn() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 786, 457);
+        setBounds(100, 100, 786, 476);
         contentPane = new JPanel();
+        contentPane.setBackground(new Color(82, 120, 171));
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
         setContentPane(contentPane);
         contentPane.setLayout(null);
 
-        JLabel logoLabel = new JLabel("");
-        logoLabel.setVerticalAlignment(SwingConstants.BOTTOM);
-//        logoLabel.setIcon(new ImageIcon(LognIn.class.getResource("/logo.png")));
-        logoLabel.setBounds(0, 0, 441, 420);
-        contentPane.add(logoLabel);
-
         JPanel panel = new JPanel();
         panel.setBackground(new Color(255, 255, 240));
-        panel.setBounds(377, 0, 395, 420);
+        panel.setBounds(377, 0, 395, 439);
         contentPane.add(panel);
         panel.setLayout(new CardLayout(0, 0));
 
         JPanel LogIn = new JPanel();
-        LogIn.setBackground(new Color(255, 255, 240));
+        LogIn.setBackground(new Color(245, 245, 245));
         LogIn.setForeground(new Color(255, 255, 240));
         panel.add(LogIn, "login");
         LogIn.setLayout(null);
 
         JLabel logninLabel = new JLabel("LOGIN");
+        logninLabel.setForeground(new Color(0, 0, 128));
+        logninLabel.setBackground(new Color(128, 0, 0));
         logninLabel.setHorizontalAlignment(SwingConstants.CENTER);
         logninLabel.setFont(new Font("Cooper Black", Font.PLAIN, 30));
         logninLabel.setBounds(105, 11, 158, 70);
@@ -105,15 +88,20 @@ public class LognIn extends JFrame {
         LogIn.add(passwordField);
 
         JCheckBox showPassword = new JCheckBox("Show Password");
-        showPassword.setBackground(new Color(255, 255, 224));
+        showPassword.setBackground(new Color(245, 245, 245));
         showPassword.setFont(new Font("Constantia", Font.PLAIN, 13));
         showPassword.setBounds(253, 234, 123, 18);
         LogIn.add(showPassword);
 
         JButton lognInButton = new JButton("OK");
+        lognInButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                lognInButton.setBackground(Color.white);
+            }
+        });
         lognInButton.setVerticalAlignment(SwingConstants.TOP);
         lognInButton.setFont(new Font("Constantia", Font.PLAIN, 20));
-        lognInButton.setBackground(new Color(255, 218, 185));
+        lognInButton.setBackground(new Color(220, 220, 220));
         lognInButton.setBounds(132, 253, 89, 27);
         LogIn.add(lognInButton);
 
@@ -129,11 +117,13 @@ public class LognIn extends JFrame {
         LogIn.add(registerText);
 
         JPanel Register = new JPanel();
-        Register.setBackground(new Color(255, 255, 240));
+        Register.setBackground(new Color(245, 245, 245));
         panel.add(Register, "register");
         Register.setLayout(null);
 
         JLabel registerText1 = new JLabel("REGISTER");
+        registerText1.setForeground(new Color(0, 0, 128));
+        registerText1.setBackground(new Color(128, 0, 0));
         registerText1.setFont(new Font("Cooper Black", Font.PLAIN, 30));
         registerText1.setBounds(109, 33, 189, 45);
         Register.add(registerText1);
@@ -172,10 +162,11 @@ public class LognIn extends JFrame {
         passwordField02.setColumns(10);
 
         JButton btnNewButton = new JButton("OK");
+        btnNewButton.setToolTipText("");
         btnNewButton.setVerticalAlignment(SwingConstants.TOP);
-        btnNewButton.setBackground(new Color(255, 218, 185));
+        btnNewButton.setBackground(new Color(211, 211, 211));
         btnNewButton.setFont(new Font("Constantia", Font.PLAIN, 20));
-        btnNewButton.setBounds(133, 307, 89, 23);
+        btnNewButton.setBounds(133, 307, 89, 30);
         Register.add(btnNewButton);
 
         JLabel Text2 = new JLabel("If you have an account!");
@@ -188,12 +179,19 @@ public class LognIn extends JFrame {
         loginText.setFont(new Font("Constantia", Font.BOLD, 15));
         loginText.setBounds(167, 359, 49, 14);
         Register.add(loginText);
+//        panel.setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[]{LogIn, logninLabel, emailLabel, passwordLabel, emailField, passwordField, showPassword, lognInButton, Text1, registerText, Register, registerText1, nameLabel, nameField, emailLabel2, emailField02, passLabel, passwordField02, btnNewButton, Text2, loginText}));
+
+        JLabel lblNewLabel = new JLabel("New label");
+        lblNewLabel.setBackground(new Color(102, 153, 204));
+        lblNewLabel.setIcon(new ImageIcon(LognIn.class.getResource("/images/logo.png")));
+        lblNewLabel.setBounds(33, 34, 302, 375);
+        contentPane.add(lblNewLabel);
 
         registerText.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 CardLayout cl = (CardLayout) panel.getLayout();
-                cl.show(panel, "register"); // tên constraints của Register panel
+                cl.show(panel, "register");
             }
         });
 
@@ -201,7 +199,7 @@ public class LognIn extends JFrame {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 CardLayout cl = (CardLayout) panel.getLayout();
-                cl.show(panel, "login"); // tên constraints của LognIn panel
+                cl.show(panel, "login");
             }
         });
     }
