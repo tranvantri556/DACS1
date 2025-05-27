@@ -33,7 +33,6 @@ public class BenhAnPanel extends JPanel {
         benhanTable = new JTable(benhanModel);
         benhanTable.setBorder(new LineBorder(new Color(64, 64, 64), 2, true));
         benhanTable.setFont(new Font("Tahoma", Font.PLAIN, 15));
-        benhanTable.setForeground(new Color(128, 0, 0));
         benhanTable.setBackground(new Color(227, 227, 227));
 
         JScrollPane benhanScrollPane = new JScrollPane(benhanTable);
@@ -226,7 +225,7 @@ public class BenhAnPanel extends JPanel {
 
                     // 4. Add to database (assuming ConnectData has a method for medical records)
                     ConnectData connectData = new ConnectData();
-                    boolean success = connectData.themBenhAn(maBenhAn, maCuDan, hoTen, phuTrach, String.valueOf(sqlNgayKham), tongQuan, chanDoan, donThuoc, ghiChu);
+                    boolean success = connectData.themBenhAn(maBenhAn, maCuDan, hoTen, phuTrach, sqlNgayKham, tongQuan, chanDoan, donThuoc, ghiChu);
 
                     // 5. Update UI
                     if (success) {
@@ -277,7 +276,7 @@ public class BenhAnPanel extends JPanel {
 
                     // 4. Update database
                     ConnectData connectData = new ConnectData();
-                    boolean success = connectData.suaBenhAn(maBenhAn, maCuDan, hoTen, phuTrach, String.valueOf(sqlNgayKham), tongQuan, chanDoan, donThuoc, ghiChu);
+                    boolean success = connectData.suaBenhAn(maBenhAn, maCuDan, hoTen, phuTrach, sqlNgayKham, tongQuan, chanDoan, donThuoc, ghiChu);
 
                     // 5. Update UI
                     if (success) {
@@ -342,7 +341,7 @@ public class BenhAnPanel extends JPanel {
                 }
             }
         });
-
+//        Lấy danh sách nhân viên từ bảng nhân sự
         DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
         ArrayList<String> dsNhanVien = con.getDanhSachNhanVien();
         for (String ten : dsNhanVien) {

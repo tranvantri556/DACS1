@@ -46,7 +46,6 @@ public class HoaDonPanel extends JPanel {
         hoadonTable.setToolTipText("");
         hoadonTable.setBorder(new LineBorder(new Color(64, 64, 64), 2, true));
         hoadonTable.setFont(new Font("Constantia", Font.PLAIN, 10));
-        hoadonTable.setForeground(new Color(128, 0, 0));
         hoadonTable.setBackground(new Color(227, 227, 227));
 
         JScrollPane hoadonScrollPane = new JScrollPane(hoadonTable);

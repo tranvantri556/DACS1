@@ -7,16 +7,25 @@ import com.toedter.calendar.JDateChooser;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
 
 public class PhanCongPanel extends JPanel {
     public JTextField maphancongField, ghichuField;
+    public JComboBox tenBenhnhanComboBox, tenNhanvienComboBox, phongComboBox, caComboBox;
+    public JDateChooser ngaytruc;
+    private DefaultTableModel phancongModel;
 
     public PhanCongPanel(){
         setBackground(new Color(245, 245, 245));
         setLayout(null);
 
-        DefaultTableModel phancongModel = new DefaultTableModel(new String[] {"Mã phân công","Tên bệnh nhân", "Tên nhân viên", "Ngày", "Phòng", "Ca", "Ghi chú"}, 0);
+        phancongModel = new DefaultTableModel(new String[] {"Mã phân công","Tên bệnh nhân", "Tên nhân viên", "Ngày", "Phòng", "Ca", "Ghi chú"}, 0);
+        ConnectData con = new ConnectData();
+        phancongModel = con.getPhanCongModel();
         JTable phancongTable = new JTable(phancongModel);
         phancongTable.setFont(new Font("Constantia", Font.PLAIN, 10));
         JScrollPane phancongScrollPane = new JScrollPane(phancongTable);
@@ -30,7 +39,7 @@ public class PhanCongPanel extends JPanel {
         add(ChitietPhancongPanel);
         ChitietPhancongPanel.setLayout(null);
 
-        JDateChooser ngaytruc = new JDateChooser();
+        ngaytruc = new JDateChooser();
         ngaytruc.getCalendarButton().setForeground(new Color(224, 255, 255));
         ngaytruc.getCalendarButton().setFont(new Font("Constantia", Font.PLAIN, 11));
         ngaytruc.getCalendarButton().setBackground(new Color(240, 255, 255));
@@ -41,7 +50,7 @@ public class PhanCongPanel extends JPanel {
         ChitietPhancongPanel.add(ngaytruc);
 
         String[] ca = {"Sáng","Chiều","Tối"};
-        JComboBox caComboBox = new JComboBox(ca);
+        caComboBox = new JComboBox(ca);
         caComboBox.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         caComboBox.setBounds(299, 21, 151, 20);
         caComboBox.setSelectedItem(null); // không chọn gì cả
@@ -93,12 +102,12 @@ public class PhanCongPanel extends JPanel {
         ChitietPhancongPanel.add(maphancongField);
         maphancongField.setColumns(10);
 
-        JComboBox tenBenhnhanComboBox = new JComboBox();
+        tenBenhnhanComboBox = new JComboBox();
         tenBenhnhanComboBox.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         tenBenhnhanComboBox.setBounds(182, 140, 207, 22);
         ChitietPhancongPanel.add(tenBenhnhanComboBox);
 
-        JComboBox tenNhanvienComboBox = new JComboBox();
+        tenNhanvienComboBox = new JComboBox();
         tenNhanvienComboBox.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         tenNhanvienComboBox.setBounds(182, 196, 207, 22);
         ChitietPhancongPanel.add(tenNhanvienComboBox);
@@ -107,7 +116,7 @@ public class PhanCongPanel extends JPanel {
                 "b1", "b2", "b3", "b4", "b5",
                 "c1", "c2", "c3", "c4", "c5",
                 "d1", "d2", "d3", "d4", "d5"};
-        JComboBox phongComboBox = new JComboBox(phong);
+        phongComboBox = new JComboBox(phong);
         phongComboBox.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         phongComboBox.setBounds(565, 89, 206, 26);
         ChitietPhancongPanel.add(phongComboBox);
@@ -143,12 +152,158 @@ public class PhanCongPanel extends JPanel {
         ChucnangPanel.add(capnhatLabel);
 
         JLabel xoaLabel = new JLabel("Xóa");
-//        xoaLabel.setIcon(new ImageIcon(View.class.getResource("/images/delete2.png")));
+        xoaLabel.setIcon(new ImageIcon(View.class.getResource("/images/delete.png")));
         xoaLabel.setFont(new Font("Constantia", Font.PLAIN, 15));
         xoaLabel.setBounds(10, 192, 117, 38);
         ChucnangPanel.add(xoaLabel);
 
+        themLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                String mapc = maphancongField.getText().trim();
+                String tenBN = (String) tenBenhnhanComboBox.getSelectedItem();
+                String tenNV = (String) tenNhanvienComboBox.getSelectedItem();
+                java.util.Date ngay = ngaytruc.getDate();
+                String phong = (String) phongComboBox.getSelectedItem();
+                String ca = (String) caComboBox.getSelectedItem();
+                String ghichu = ghichuField.getText().trim();
 
+                if (mapc.isEmpty() || tenBN.isEmpty() || tenNV.isEmpty()
+                        || phong.isEmpty() || ca.isEmpty() || ghichu.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Vui lòng điền đầy đủ thông tin!");
+                    return;
+                }
+
+                if (con.themPhanCong(tenBN, tenNV, ngay, phong, ca, ghichu)) {
+                    phancongModel.addRow(new Object[]{mapc, tenBN, tenNV, new SimpleDateFormat("dd/MM/yyyy").format(ngay), phong, ca, ghichu});
+                    JOptionPane.showMessageDialog(null, "Thêm phân công thành công!");
+                    clearForm();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Thêm phân công thất bại!");
+                }
+            }
+        });
+
+        capnhatLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int selectedRow = phancongTable.getSelectedRow();
+                if (selectedRow == -1) {
+                    JOptionPane.showMessageDialog(null, "Vui lòng chọn bệnh án để sửa!");
+                    return;
+                }
+
+                try {
+                    // 1. Get data from form
+                    int maPC = Integer.parseInt(maphancongField.getText().trim());
+                    String tenBN = (String) tenBenhnhanComboBox.getSelectedItem();
+                    String tenNV = (String) tenNhanvienComboBox.getSelectedItem();
+                    java.util.Date utilNgay = ngaytruc.getDate();
+                    String phong = (String) phongComboBox.getSelectedItem();
+                    String ca = (String) caComboBox.getSelectedItem();
+                    String ghiChu = ghichuField.getText().trim();
+
+                    // 2. Validate inputs
+                    if (tenBN.isEmpty() || tenNV.isEmpty() || utilNgay == null) {
+                        JOptionPane.showMessageDialog(null, "Vui lòng điền đầy đủ thông tin bắt buộc!");
+                        return;
+                    }
+
+                    // 4. Update database
+                    boolean success = con.suaPhanCong(maPC, tenBN, tenNV, utilNgay, phong, ca, ghiChu);
+
+                    // 5. Update UI
+                    if (success) {
+                        phancongModel.setValueAt(maPC, selectedRow, 0);
+                        phancongModel.setValueAt(tenBN, selectedRow, 1);
+                        phancongModel.setValueAt(tenNV, selectedRow, 2);
+                        phancongModel.setValueAt(new SimpleDateFormat("dd/MM/yyyy").format(utilNgay), selectedRow, 3);
+                        phancongModel.setValueAt(phong, selectedRow, 4);
+                        phancongModel.setValueAt(ca, selectedRow, 5);
+                        phancongModel.setValueAt(ghiChu, selectedRow, 6);
+                        JOptionPane.showMessageDialog(null, "Cập nhật phân công thành công!");
+                        clearForm();
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Cập nhật thất bại!");
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Lỗi: " + ex.getMessage());
+                }
+            }
+        });
+
+        xoaLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int selectedRow = phancongTable.getSelectedRow();
+                if (selectedRow == -1) {
+                    JOptionPane.showMessageDialog(null, "Vui lòng chọn phân công để xóa!");
+                    return;
+                }
+
+                int confirm = JOptionPane.showConfirmDialog(null, "Bạn có chắc chắn muốn xóa phân công này?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+                if (confirm == JOptionPane.YES_OPTION) {
+                    int maPC = Integer.parseInt(phancongModel.getValueAt(selectedRow, 0).toString());
+                    if (con.xoaPhanCong(maPC)) {
+                        phancongModel.removeRow(selectedRow);
+                        JOptionPane.showMessageDialog(null, "Xóa phân công thành công!");
+                        clearForm();
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Xóa phân công thất bại!");
+                    }
+                }
+            }
+        });
+
+//      Lấy danh sách nhân viên
+        DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
+        ArrayList<String> dsNhanVien = con.getDanhSachNhanVien();
+        for (String ten : dsNhanVien) {
+            model.addElement(ten);
+        }
+        tenNhanvienComboBox.setModel(model);
+
+//      Lấy danh sách bệnh nhân
+        DefaultComboBoxModel<String> model1 = new DefaultComboBoxModel<>();
+        ArrayList<String> dsBenhnhan = con.getDanhSachBenhNhan();
+        for (String ten : dsBenhnhan) {
+            model1.addElement(ten);
+        }
+        tenBenhnhanComboBox.setModel(model1);
+
+        phancongTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int selectedRow = phancongTable.getSelectedRow();
+                if (selectedRow >= 0) {
+                    maphancongField.setText(phancongModel.getValueAt(selectedRow, 0).toString());
+                    tenBenhnhanComboBox.setSelectedItem(phancongModel.getValueAt(selectedRow, 1).toString());
+                    tenNhanvienComboBox.setSelectedItem(phancongModel.getValueAt(selectedRow, 2).toString());
+                    try {
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                        String strNgay = phancongTable.getValueAt(selectedRow, 3).toString();
+                        ngaytruc.setDate(sdf.parse(strNgay));
+                    } catch (ParseException ex) {
+                        ex.printStackTrace();
+                    }
+                    phongComboBox.setSelectedItem(phancongModel.getValueAt(selectedRow, 4)); // index 4
+                    caComboBox.setSelectedItem(phancongModel.getValueAt(selectedRow, 5).toString()); // index 5
+                    ghichuField.setText(phancongModel.getValueAt(selectedRow, 6).toString()); // index 6
+
+                }
+            }
+        });
+    }
+
+    public void clearForm() {
+        maphancongField.setText("");
+        tenBenhnhanComboBox.setSelectedIndex(-1);
+        tenNhanvienComboBox.setSelectedIndex(-1);
+        ngaytruc.setDate(null);
+        phongComboBox.setSelectedIndex(0);
+        caComboBox.setSelectedIndex(-1);
+        ((JTextField) caComboBox.getEditor().getEditorComponent()).setText("Ca");
+        ghichuField.setText("");
     }
 
 }

@@ -29,7 +29,6 @@ public class BenhNhanPanel extends JPanel {
         benhnhanTable.setToolTipText("");
         benhnhanTable.setBorder(new LineBorder(new Color(64, 64, 64), 2, true));
         benhnhanTable.setFont(new Font("Tahoma", Font.PLAIN, 15));
-        benhnhanTable.setForeground(new Color(128, 0, 0));
         benhnhanTable.setBackground(new Color(227, 227, 227));
 
         JScrollPane benhnhanScrollPane = new JScrollPane(benhnhanTable);

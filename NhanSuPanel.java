@@ -23,7 +23,6 @@ public class NhanSuPanel extends JPanel {
         nhansuTable.setToolTipText("");
         nhansuTable.setBorder(new LineBorder(new Color(64, 64, 64), 2, true));
         nhansuTable.setFont(new Font("Constantia", Font.PLAIN, 10));
-        nhansuTable.setForeground(new Color(128, 0, 0));
         nhansuTable.setBackground(new Color(227, 227, 227));
 
         // Chỉnh độ rộng từng cột (tùy bạn điều chỉnh số pixel theo nội dung)

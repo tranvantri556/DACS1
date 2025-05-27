@@ -2,6 +2,7 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.*;
+//import org.eclipse.wb.swing.*;
 import java.awt.event.*;
 
 
@@ -92,11 +93,33 @@ public class LognIn extends JFrame {
         showPassword.setFont(new Font("Constantia", Font.PLAIN, 13));
         showPassword.setBounds(253, 234, 123, 18);
         LogIn.add(showPassword);
+        showPassword.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (showPassword.isSelected()) {
+                    passwordField.setEchoChar((char) 0);  // Hiện mật khẩu
+                } else {
+                    passwordField.setEchoChar('•');       // Ẩn mật khẩu
+                }
+            }
+        });
 
         JButton lognInButton = new JButton("OK");
         lognInButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 lognInButton.setBackground(Color.white);
+                String email = emailField.getText().trim();
+                String password = new String(passwordField.getPassword()).trim();
+
+                ConnectData con = new ConnectData();
+                if (con.checkLogin(email, password)) {
+                    JOptionPane.showMessageDialog(null, "Login successful!");
+                    View v = new View();
+                    v.setVisible(true);
+                    dispose();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Invalid email or password.");
+                }
+
             }
         });
         lognInButton.setVerticalAlignment(SwingConstants.TOP);
@@ -107,14 +130,28 @@ public class LognIn extends JFrame {
 
         JLabel Text1 = new JLabel("If you don't have an account!");
         Text1.setFont(new Font("Constantia", Font.PLAIN, 15));
-        Text1.setBounds(10, 359, 195, 14);
+        Text1.setBounds(10, 335, 195, 14);
         LogIn.add(Text1);
 
         JLabel registerText = new JLabel("Register");
         registerText.setForeground(new Color(220, 20, 60));
         registerText.setFont(new Font("Constantia", Font.BOLD, 15));
-        registerText.setBounds(203, 359, 89, 14);
+        registerText.setBounds(203, 335, 89, 14);
         LogIn.add(registerText);
+
+        JLabel quenmatkhauLabel = new JLabel("Forgot your paswword");
+        quenmatkhauLabel.setForeground(new Color(0, 0, 128));
+        quenmatkhauLabel.setFont(new Font("Constantia", Font.PLAIN, 15));
+        quenmatkhauLabel.setBounds(10, 310, 158, 14);
+        LogIn.add(quenmatkhauLabel);
+
+        quenmatkhauLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                nhapEmail dialog = new nhapEmail((JFrame) SwingUtilities.getWindowAncestor(quenmatkhauLabel));
+                dialog.setVisible(true);
+            }
+        });
 
         JPanel Register = new JPanel();
         Register.setBackground(new Color(245, 245, 245));
@@ -168,6 +205,28 @@ public class LognIn extends JFrame {
         btnNewButton.setFont(new Font("Constantia", Font.PLAIN, 20));
         btnNewButton.setBounds(133, 307, 89, 30);
         Register.add(btnNewButton);
+        btnNewButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String name = nameField.getText().trim();
+                String email = emailField02.getText().trim();
+                String password = passwordField02.getText().trim();
+
+                ConnectData con = new ConnectData();
+                if (name.equals("") || email.equals("") || password.equals("")) {
+                    JOptionPane.showMessageDialog(null, "Please fill in all fields!");
+                } else {
+                    boolean success = con.registerUser(name, email, password);
+                    if (success) {
+                        JOptionPane.showMessageDialog(null, "Registration successful!");
+                        // Chuyển về giao diện Login
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Registration failed!");
+                    }
+                }
+
+            }
+        });
 
         JLabel Text2 = new JLabel("If you have an account!");
         Text2.setFont(new Font("Constantia", Font.PLAIN, 15));
@@ -179,7 +238,7 @@ public class LognIn extends JFrame {
         loginText.setFont(new Font("Constantia", Font.BOLD, 15));
         loginText.setBounds(167, 359, 49, 14);
         Register.add(loginText);
-//        panel.setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[]{LogIn, logninLabel, emailLabel, passwordLabel, emailField, passwordField, showPassword, lognInButton, Text1, registerText, Register, registerText1, nameLabel, nameField, emailLabel2, emailField02, passLabel, passwordField02, btnNewButton, Text2, loginText}));
+//        panel.setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[]{LogIn, logninLabel, emailLabel, passwordLabel, emailField, passwordField, showPassword, lognInButton, Text1, registerText, Register, registerText1, nameLabel, nameField, emailLabel2, emailField02, passLabel, passwordField02, btnNewButton, Text2, loginText, quenmatkhauLabel}));
 
         JLabel lblNewLabel = new JLabel("New label");
         lblNewLabel.setBackground(new Color(102, 153, 204));
