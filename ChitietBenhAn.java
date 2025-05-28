@@ -12,6 +12,8 @@ public class ChitietBenhAn extends JDialog {
     private JTextField cannangField;
     private JTextField chieucaoField;
     private JTextField huyetapField;
+    private JRadioButton nam, nu;
+    private JLabel tuoiBenhnhan;
 
     /**
      * Launch the application.
@@ -106,13 +108,13 @@ public class ChitietBenhAn extends JDialog {
         trieuchungTamlicomboBox.setBounds(352, 163, 185, 23);
         chitietPanel.add(trieuchungTamlicomboBox);
 
-        JRadioButton nam = new JRadioButton("Nam");
+        nam = new JRadioButton("Nam");
         nam.setVerticalAlignment(SwingConstants.TOP);
         nam.setFont(new Font("Constantia", Font.PLAIN, 12));
         nam.setBounds(352, 99, 70, 23);
         chitietPanel.add(nam);
 
-        JRadioButton nu = new JRadioButton("Nữ");
+        nu = new JRadioButton("Nữ");
         nu.setVerticalAlignment(SwingConstants.TOP);
         nu.setFont(new Font("Constantia", Font.PLAIN, 12));
         nu.setBounds(435, 99, 70, 23);
@@ -122,7 +124,7 @@ public class ChitietBenhAn extends JDialog {
         gioitinhBenhan.add(nam);
         gioitinhBenhan.add(nu);
 
-        JLabel tuoiBenhnhan = new JLabel("...");
+        tuoiBenhnhan = new JLabel("...");
         tuoiBenhnhan.setBounds(352, 135, 49, 14);
         chitietPanel.add(tuoiBenhnhan);
 
@@ -180,5 +182,23 @@ public class ChitietBenhAn extends JDialog {
                 });
             }
         }
+    }
+    // Sửa đúng biến hotenField
+    public void setHoTen(String hoTen) {
+        hotenField.setText(hoTen);
+    }
+
+    // Nếu muốn set giới tính, cần tick chọn radio button
+    public void setGioiTinh(String gioiTinh) {
+        if ("Nam".equalsIgnoreCase(gioiTinh)) {
+            nam.setSelected(true);
+        } else if ("Nữ".equalsIgnoreCase(gioiTinh)) {
+            nu.setSelected(true);
+        }
+    }
+
+    // Sửa đúng JLabel tuổi
+    public void setTuoi(String tuoi) {
+        tuoiBenhnhan.setText(tuoi);
     }
 }

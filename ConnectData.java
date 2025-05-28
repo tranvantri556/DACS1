@@ -213,12 +213,15 @@ public class ConnectData {
              ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
+                Date ngay = rs.getDate("ngaykham");
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+
                 Object[] row = new Object[] {
                         rs.getInt("id_benhan"),
                         rs.getInt("id_benhnhan"),
                         rs.getString("ten_benhnhan"),
                         rs.getString("phutrach"),
-                        rs.getDate("ngaykham"),
+                        sdf.format(ngay),
                         rs.getString("chandoan"),
                         rs.getString("donthuoc"),
                         rs.getString("ghichu"),
@@ -296,23 +299,45 @@ public class ConnectData {
             model.setRowCount(0); // Xóa dữ liệu cũ
 
             while (rs.next()) {
+                Date ngay = rs.getDate("ngaykham");
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
                 model.addRow(new Object[]{
                         rs.getInt("id_benhan"),
                         rs.getInt("id_benhnhan"),
                         rs.getString("ten_benhnhan"),
                         rs.getString("phutrach"),
-                        rs.getDate("ngaykham"),
-                        rs.getString("tinhtrangchung"),
+                        sdf.format(ngay),
                         rs.getString("chandoan"),
                         rs.getString("donthuoc"),
-                        rs.getString("ghichu")
+                        rs.getString("ghichu"),
+                        rs.getString("tinhtrangchung")
                 });
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-//  Lấy danh sách nhn viên cho Bệnh án và Phân công
+
+    public ArrayList<String> getBenhNhanByMaCuDan(int maCuDan) {
+        ArrayList<String> ds = new ArrayList<>();
+        String query = "SELECT * FROM Benhnhan WHERE id_benhnhan = ?";
+        try {
+            PreparedStatement stmt = con.prepareStatement(query);
+            stmt.setInt(1, maCuDan);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                        ds.add(String.valueOf(rs.getInt("id_benhnhan")));
+                        ds.add(rs.getString("hoten"));
+                        ds.add(String.valueOf(rs.getDate("ngaysinh")));
+                        ds.add(rs.getString("gioitinh"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return ds;
+    }
+//  Lấy danh sách nhân viên cho Bệnh án và Phân công
     public ArrayList<String> getDanhSachNhanVien() {
         ArrayList<String> danhSach = new ArrayList<>();
         String sql = "SELECT hoten FROM Nhanvien";

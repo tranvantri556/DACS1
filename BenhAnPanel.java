@@ -5,6 +5,8 @@ import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.Date;
@@ -191,9 +193,32 @@ public class BenhAnPanel extends JPanel {
         add(chitietbenhanButton);
 
         // Event listeners
-        chitietbenhanButton.addActionListener(e -> {
-            ChitietBenhAn dialog = new ChitietBenhAn((JFrame) SwingUtilities.getWindowAncestor(this));
-            dialog.setVisible(true);
+        chitietbenhanButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = benhanTable.getSelectedRow();
+                if (selectedRow < 0) {
+                    JOptionPane.showMessageDialog(null, "Vui lòng chọn một bệnh án!");
+                    return;
+                }
+
+                int maCuDan = Integer.parseInt(benhanModel.getValueAt(selectedRow, 1).toString());
+                ArrayList<String> benhNhanData = con.getBenhNhanByMaCuDan(maCuDan);
+                if (benhNhanData.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Không tìm thấy thông tin bệnh nhân!");
+                    return;
+                }
+
+                String hoTen = benhNhanData.get(1);
+                String gioiTinh = benhNhanData.get(3);
+                String tuoi = calculateAge(Date.valueOf(benhNhanData.get(2)));
+
+                ChitietBenhAn dialog = new ChitietBenhAn((JFrame) SwingUtilities.getWindowAncestor(BenhAnPanel.this));
+                dialog.setHoTen(hoTen);
+                dialog.setGioiTinh(gioiTinh);
+                dialog.setTuoi(tuoi);
+                dialog.setVisible(true);
+            }
         });
 
         themBenhan.addMouseListener(new MouseAdapter() {
@@ -359,7 +384,7 @@ public class BenhAnPanel extends JPanel {
                     hotenBenhAnField.setText(benhanModel.getValueAt(selectedRow, 2).toString());
                     phutrachComboBox.setSelectedItem(benhanModel.getValueAt(selectedRow, 3));
                     try {
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
                         String strNgaykham = benhanTable.getValueAt(selectedRow, 4).toString();
                         ngaykham.setDate(sdf.parse(strNgaykham));
                     } catch (ParseException ex) {
@@ -372,6 +397,14 @@ public class BenhAnPanel extends JPanel {
                 }
             }
         });
+    }
+
+    // Phương thức tính tuổi từ ngày sinh
+    private String calculateAge(Date ngaySinh) {
+        if (ngaySinh == null) return "";
+        long diff = System.currentTimeMillis() - ngaySinh.getTime();
+        long years = diff / (1000L * 60 * 60 * 24 * 365);
+        return String.valueOf(years);
     }
 
     public void clearForm () {
