@@ -284,7 +284,17 @@ public class HoaDonPanel extends JPanel {
                         double thanhTien = soNgay * donGia;
 
                         if (con.suaHoaDon(maHoaDon, tuNgay, denNgay, maBenhNhan, hoTen, dichVu, thanhTien, ngayLap, trangThai, soNgay, donGia)) {
-                            hoadonModel.addRow(new Object[]{maHoaDon, maBenhNhan, hoTen, new SimpleDateFormat("dd/MM/yyyy").format(tuNgay), new SimpleDateFormat("dd/MM/yyyy").format(denNgay), ngayLap, dichVu, soNgay, donGia, thanhTien, trangThai});
+                            hoadonModel.setValueAt(maHoaDon, selectedRow, 0);
+                            hoadonModel.setValueAt(maBenhNhan, selectedRow, 1);
+                            hoadonModel.setValueAt(hoTen, selectedRow, 2);
+                            hoadonModel.setValueAt(new SimpleDateFormat("dd/MM/yyyy").format(tuNgay), selectedRow, 3);
+                            hoadonModel.setValueAt(new SimpleDateFormat("dd/MM/yyyy").format(denNgay), selectedRow, 4);
+                            hoadonModel.setValueAt(ngayLap, selectedRow, 5);
+                            hoadonModel.setValueAt(dichVu, selectedRow, 6);
+                            hoadonModel.setValueAt(soNgay, selectedRow, 7);
+                            hoadonModel.setValueAt(donGia, selectedRow, 8);
+                            hoadonModel.setValueAt(thanhTien, selectedRow, 9);
+                            hoadonModel.setValueAt(trangThai, selectedRow, 10);
                             capNhatTongTien();
                             JOptionPane.showMessageDialog(null, "Sửa hóa đơn thành công!");
                         } else {
@@ -298,7 +308,6 @@ public class HoaDonPanel extends JPanel {
                 }
             }
         });
-
 
         lammoiLabel.addMouseListener(new MouseAdapter() {
             @Override

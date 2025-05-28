@@ -293,6 +293,13 @@ public class PhanCongPanel extends JPanel {
                 }
             }
         });
+
+        lammoiLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                clearForm();
+            }
+        });
     }
 
     public void clearForm() {

@@ -177,6 +177,30 @@ public class NhanSuPanel extends JPanel {
         timkiemLabel.setBounds(664, 17, 24, 22);
         locdanhsachPanel.add(timkiemLabel);
 
+        xoaNhansu.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int selectedRow = nhansuTable.getSelectedRow();
+                if (selectedRow == -1) {
+                    JOptionPane.showMessageDialog(null, "Vui lòng chọn nhân viên để xóa!");
+                    return;
+                }
+
+                int maNS = (int) nhansuModel.getValueAt(selectedRow, 0);
+                int confirm = JOptionPane.showConfirmDialog(null, "Bạn có chắc muốn xóa nhân viên mã " + maNS + " không?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
+                if (confirm != JOptionPane.YES_OPTION) return;
+
+                ConnectData connectData = new ConnectData();
+                boolean success = connectData.xoaNhanSu(maNS);
+                if (success) {
+                    nhansuModel.removeRow(selectedRow);
+                    JOptionPane.showMessageDialog(null, "Xóa nhân viên thành công!");
+                } else {
+                    JOptionPane.showMessageDialog(null, "Xóa thất bại!");
+                }
+            }
+        });
+
         timkiemLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {

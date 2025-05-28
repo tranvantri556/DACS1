@@ -1,6 +1,10 @@
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ChitietBenhAn extends JDialog {
 
@@ -14,6 +18,14 @@ public class ChitietBenhAn extends JDialog {
     private JTextField huyetapField;
     private JRadioButton nam, nu;
     private JLabel tuoiBenhnhan;
+    private Map<String, ChitietBenhAn> dsChiTiet = new HashMap<>();
+    private String maBenhNhan;
+    private String trieuChungTamLy;
+    private String lichSuBenh;
+    private String benhNen;
+    private String canNang;
+    private String chieuCao;
+    private String huyetAp;
 
     /**
      * Launch the application.
@@ -170,6 +182,47 @@ public class ChitietBenhAn extends JDialog {
             suaBenhanButton.setBackground(new Color(220, 220, 220));
             suaBenhanButton.setFont(new Font("Tahoma", Font.PLAIN, 12));
             buttonPane.add(suaBenhanButton);
+
+            suaBenhanButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    // Lấy dữ liệu từ các trường nhập liệu
+                    String trieuchung = (String) trieuchungTamlicomboBox.getSelectedItem();
+                    String lichsu = lichsuField.getText().trim();
+                    String benhnen = benhnenField.getText().trim();
+                    String cannang = cannangField.getText().trim();
+                    String chieucao = chieucaoField.getText().trim();
+                    String huyetap = huyetapField.getText().trim();
+
+                    // Kiểm tra dữ liệu bắt buộc không được để trống
+                    if (trieuchung == null || trieuchung.isEmpty() ||
+                            lichsu.isEmpty() || benhnen.isEmpty() ||
+                            cannang.isEmpty() || chieucao.isEmpty() || huyetap.isEmpty()) {
+                        JOptionPane.showMessageDialog(ChitietBenhAn.this,
+                                "Vui lòng điền đầy đủ thông tin!",
+                                "Lỗi nhập liệu",
+                                JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+
+                    // Cập nhật dữ liệu cho đối tượng hiện tại
+                    setTrieuChungTamLy(trieuchung);
+                    setLichSuBenh(lichsu);
+                    setBenhNen(benhnen);
+                    setCanNang(cannang);
+                    setChieuCao(chieucao);
+                    setHuyetAp(huyetap);
+
+                    // Cập nhật Map với key mã bệnh nhân
+                    dsChiTiet.put(maBenhNhan, ChitietBenhAn.this);
+
+                    // Thông báo thành công
+                    JOptionPane.showMessageDialog(ChitietBenhAn.this,
+                            "Đã cập nhật chi tiết bệnh nhân!",
+                            "Thành công",
+                            JOptionPane.INFORMATION_MESSAGE);
+                }
+            });
             {
                 JButton cancelButton = new JButton("Đóng");
                 cancelButton.setFont(new Font("Tahoma", Font.PLAIN, 12));
@@ -201,4 +254,19 @@ public class ChitietBenhAn extends JDialog {
     public void setTuoi(String tuoi) {
         tuoiBenhnhan.setText(tuoi);
     }
+
+    public String getMaBenhNhan() { return maBenhNhan; }
+    public void setMaBenhNhan(String maBenhNhan) { this.maBenhNhan = maBenhNhan; }
+    public String getTrieuChungTamLy() { return trieuChungTamLy; }
+    public void setTrieuChungTamLy(String trieuChungTamLy) { this.trieuChungTamLy = trieuChungTamLy; }
+    public String getLichSuBenh() { return lichSuBenh; }
+    public void setLichSuBenh(String lichSuBenh) { this.lichSuBenh = lichSuBenh; }
+    public String getBenhNen() { return benhNen; }
+    public void setBenhNen(String benhNen) { this.benhNen = benhNen; }
+    public String getCanNang() { return canNang; }
+    public void setCanNang(String canNang) { this.canNang = canNang; }
+    public String getChieuCao() { return chieuCao; }
+    public void setChieuCao(String chieuCao) { this.chieuCao = chieuCao; }
+    public String getHuyetAp() { return huyetAp; }
+    public void setHuyetAp(String huyetAp) { this.huyetAp = huyetAp; }
 }

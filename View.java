@@ -242,8 +242,16 @@ public class View extends JFrame {
         });
 
 
-        JPanel baocaoPanel = new JPanel();
+        BaoCaoPanel baocaoPanel = new BaoCaoPanel();
         Panel.add(baocaoPanel, "baocaoPanel");
+
+        baocaoButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                CardLayout cl = (CardLayout) Panel.getLayout();
+                cl.show(Panel, "baocaoPanel");
+            }
+        });
 
     }
 

@@ -5,6 +5,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class ConnectData {
@@ -405,7 +407,7 @@ public class ConnectData {
             java.sql.Date sqlNgayLap = new java.sql.Date(new SimpleDateFormat("dd/MM/yyyy").parse(ngayLap).getTime());
 
             // Thêm vào bảng Hóa đơn
-            psHD.setInt(1, Integer.parseInt(maBenhNhan)); // id_benhnhan
+            psHD.setInt(1, Integer.parseInt(maBenhNhan));// id_benhnhan
             psHD.setString(2, hoTen); // hoten
             psHD.setDate(3, sqlTuNgay); // tungay
             psHD.setDate(4, sqlDenNgay);
@@ -428,23 +430,24 @@ public class ConnectData {
     public boolean suaHoaDon(String maHoaDon, Date tuNgay, Date denNgay, String maBenhNhan,
                              String hoTen, String dichVu, double thanhTien, String ngayLap, String trangThai,
                              int soNgay, double donGia) {
-        String sql = "UPDATE Hoadon SET MaBenhNhan = ?, HoTen = ?, TuNgay = ?, DenNgay = ?, NgayLap = ?, " +
-                "DichVu = ?, SoNgay = ?, DonGia = ?, ThanhTien = ?, TrangThai = ? WHERE MaHoaDon = ?";
+        String sql = "UPDATE Hoadon SET id_benhnhan = ?, hoten = ?, tungay = ?, denngay = ?, ngaylap = ?, " +
+                "dichvu = ?, dongia = ?, tongtien = ?, trangthai = ? WHERE id_hoadon = ?";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
 
             java.sql.Date sqlTuNgay = new java.sql.Date(tuNgay.getTime());
             java.sql.Date sqlDenNgay = new java.sql.Date(denNgay.getTime());
             java.sql.Date sqlNgayLap = new java.sql.Date(new SimpleDateFormat("dd/MM/yyyy").parse(ngayLap).getTime());
 
-            ps.setInt(1, Integer.parseInt(maBenhNhan)); // id_benhnhan
-            ps.setString(2, hoTen); // hoten
-            ps.setDate(3, sqlTuNgay); // tungay
-            ps.setDate(4, sqlDenNgay);
-            ps.setString(5, dichVu); // dichvu
-            ps.setDouble(6, donGia); // dongia
-            ps.setDouble(7, thanhTien); // tongtien
-            ps.setDate(8, sqlNgayLap);
-            ps.setString(9, trangThai);
+            ps.setInt(1, Integer.parseInt(maBenhNhan));  // MaBenhNhan
+            ps.setString(2, hoTen);                      // HoTen
+            ps.setDate(3, sqlTuNgay);                    // TuNgay
+            ps.setDate(4, sqlDenNgay);                   // DenNgay
+            ps.setDate(5, sqlNgayLap);                   // NgayLap
+            ps.setString(6, dichVu);
+            ps.setDouble(7, donGia);                     // DonGia
+            ps.setDouble(8, thanhTien);                  // ThanhTien
+            ps.setString(9, trangThai);                  // TrangThai
+            ps.setString(10, maHoaDon);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
@@ -466,11 +469,13 @@ public class ConnectData {
              ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
+                Date ngay = rs.getDate("ngaysinh");
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
                 Object[] row = new Object[] {
                         rs.getInt("id_nhanvien"),
                         rs.getString("hoten"),
                         rs.getString("gioitinh"),
-                        rs.getDate("ngaysinh"),
+                        sdf.format(ngay),
                         rs.getString("dienthoai"),
                         rs.getString("diachi"),
                         rs.getString("phongban"),
@@ -523,6 +528,17 @@ public class ConnectData {
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean xoaNhanSu(int idNS) {
+        String sql = "DELETE FROM Nhanvien WHERE id_nhanvien = ?";
+        try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+            pstmt.setInt(1, idNS);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
             return false;
         }
     }
@@ -622,6 +638,29 @@ public class ConnectData {
         }
         return danhSach;
     }
+//  Báo cáo
+    public Map<String, Integer> getThongKeBenhNhanTheoGioiTinh() throws SQLException {
+        Map<String, Integer> data = new HashMap<>();
+        String sql = "SELECT GioiTinh, COUNT(*) AS SoLuong FROM Benhnhan GROUP BY gioitinh";
+        PreparedStatement stmt = con.prepareStatement(sql);
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            data.put(rs.getString("gioitinh"), rs.getInt("SoLuong"));
+        }
+        return data;
+    }
+
+    public Map<String, Integer> getThongKeNhanVienTheoBoPhan() throws SQLException {
+        Map<String, Integer> data = new HashMap<>();
+        String sql = "SELECT chucvu, COUNT(*) AS SoLuong FROM Nhanvien GROUP BY chucvu";
+        PreparedStatement stmt = con.prepareStatement(sql);
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            data.put(rs.getString("chucvu"), rs.getInt("SoLuong"));
+        }
+        return data;
+    }
+
 
     public static void main(String[] args) {
         ConnectData cd = new ConnectData();
